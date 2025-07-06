@@ -3,7 +3,8 @@ import json
 import time
 from typing import Any, Callable, Dict, List, Tuple
 
-from pyrogram import Client, types
+from telethon import TelegramClient
+from telethon import functions
 
 from app.notifications import send_summary_message
 from app.utils.logger import log_same_line, info
@@ -20,14 +21,12 @@ async def load_old_gifts() -> Dict[int, dict]:
 
 async def save_gifts(gifts: List[dict]) -> None:
     with config.DATA_FILEPATH.open("w", encoding='utf-8') as file:
-        json.dump(gifts, file, indent=4, default=types.Object.default, ensure_ascii=False)
+        json.dump(gifts, file, indent=4, ensure_ascii=False)
 
 
-async def get_current_gifts(app: Client) -> Tuple[Dict[int, dict], List[int]]:
-    gifts = [
-        json.loads(json.dumps(gift, default=types.Object.default, ensure_ascii=False))
-        for gift in await app.get_available_gifts()
-    ]
+async def get_current_gifts(app: TelegramClient) -> Tuple[Dict[int, dict], List[int]]:
+    result = await app(functions.payments.GetAvailableGiftsRequest())
+    gifts = [gift.to_dict() for gift in getattr(result, "gifts", [])]
     gifts_dict = {gift["id"]: gift for gift in gifts}
     return gifts_dict, list(gifts_dict.keys())
 
@@ -42,7 +41,7 @@ def categorize_gift_skips(gift_data: Dict[str, Any]) -> Dict[str, int]:
     return {key: 1 if condition else 0 for key, condition in skip_categories.items()}
 
 
-async def detector(app: Client, callback: Callable) -> None:
+async def detector(app: TelegramClient, callback: Callable) -> None:
     dot_count = 0
 
     while True:
@@ -50,8 +49,8 @@ async def detector(app: Client, callback: Callable) -> None:
         log_same_line(f'{t("console.gift_checking")}{"." * dot_count}')
         time.sleep(0.2)
 
-        if not app.is_connected:
-            await app.start()
+        if not app.is_connected():
+            await app.connect()
 
         old_gifts = await load_old_gifts()
         current_gifts, gift_ids = await get_current_gifts(app)

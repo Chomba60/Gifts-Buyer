@@ -1,18 +1,19 @@
 from typing import Optional, Tuple
 
-from pyrogram import Client
+from telethon import TelegramClient, functions
 
 
-async def get_user_balance(client: Client) -> int:
+async def get_user_balance(client: TelegramClient) -> int:
     try:
-        return await client.get_stars_balance()
+        balance = await client(functions.payments.GetStarsBalanceRequest())
+        return getattr(balance, "balance", 0)
     except Exception:
         return 0
 
 
-async def get_recipient_info(app: Client, chat_id: int) -> Tuple[str, str]:
+async def get_recipient_info(app: TelegramClient, chat_id: int) -> Tuple[str, str]:
     try:
-        user = await app.get_chat(chat_id)
+        user = await app.get_entity(chat_id)
         username = user.username or ""
 
         recipient_info = (

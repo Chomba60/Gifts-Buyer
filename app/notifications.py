@@ -1,12 +1,12 @@
-from pyrogram import Client
-from pyrogram.errors import RPCError
+from telethon import TelegramClient
+from telethon.errors import RPCError
 
 from app.utils.helper import get_user_balance, format_user_reference
 from app.utils.logger import error
 from data.config import config, t
 
 
-async def send_message(app: Client, message: str) -> None:
+async def send_message(app: TelegramClient, message: str) -> None:
     if not config.CHANNEL_ID:
         return
 
@@ -16,7 +16,7 @@ async def send_message(app: Client, message: str) -> None:
         error(f'Failed to send notification: {str(ex)}')
 
 
-async def send_notification(app: Client, gift_id: int, **kwargs) -> None:
+async def send_notification(app: TelegramClient, gift_id: int, **kwargs) -> None:
     total_gifts = kwargs.get('total_gifts', 1)
 
     supply_text = ""
@@ -44,7 +44,7 @@ async def send_notification(app: Client, gift_id: int, **kwargs) -> None:
             return
 
 
-async def send_start_message(client: Client) -> None:
+async def send_start_message(client: TelegramClient) -> None:
     balance = await get_user_balance(client)
     ranges_text = "\n".join([
         f"• {r['min_price']}-{r['max_price']} ⭐ (supply ≤ {r['supply_limit']}) x{r['quantity']}"
@@ -59,7 +59,7 @@ async def send_start_message(client: Client) -> None:
     await send_message(client, message)
 
 
-async def send_summary_message(app: Client, sold_out_count: int = 0,
+async def send_summary_message(app: TelegramClient, sold_out_count: int = 0,
                                non_limited_count: int = 0, non_upgradable_count: int = 0) -> None:
     if not config.CHANNEL_ID:
         return
