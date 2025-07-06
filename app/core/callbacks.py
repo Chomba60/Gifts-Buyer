@@ -1,7 +1,7 @@
 import asyncio
 from typing import Dict, Any
 
-from pyrogram import Client
+from telethon import TelegramClient
 
 from app.notifications import send_notification
 from app.purchase import buy_gift
@@ -48,7 +48,7 @@ class GiftFilter:
         return True, {"quantity": quantity}
 
 
-async def new_callback(app: Client, gift_data: Dict[str, Any]) -> None:
+async def new_callback(app: TelegramClient, gift_data: Dict[str, Any]) -> None:
     gift_id = gift_data.get("id")
     is_eligible, notification_kwargs = await GiftFilter.is_eligible(gift_data)
 

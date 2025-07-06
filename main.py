@@ -1,7 +1,7 @@
 import asyncio
 import traceback
 
-from pyrogram import Client
+from telethon import TelegramClient
 
 from app.core.banner import display_title, get_app_info, set_window_title
 from app.core.callbacks import new_callback
@@ -17,12 +17,12 @@ async def main() -> None:
     set_window_title(app_info)
     display_title(app_info, get_language_display(config.LANGUAGE))
 
-    async with Client(
-            name=config.SESSION,
-            api_id=config.API_ID,
-            api_hash=config.API_HASH,
-            phone_number=config.PHONE_NUMBER
+    async with TelegramClient(
+            config.SESSION,
+            config.API_ID,
+            config.API_HASH
     ) as client:
+        await client.start(phone=config.PHONE_NUMBER)
         await send_start_message(client)
         await detector(client, new_callback)
 

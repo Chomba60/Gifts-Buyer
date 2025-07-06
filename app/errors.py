@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
-from pyrogram import Client
-from pyrogram.errors import RPCError
+from telethon import TelegramClient
+from telethon.errors import RPCError
 
 from app.notifications import send_notification
 from app.utils.logger import error
@@ -30,7 +30,7 @@ class ErrorHandler:
         }
 
 
-async def handle_gift_error(app: Client, ex: RPCError, gift_id: int, chat_id: int,
+async def handle_gift_error(app: TelegramClient, ex: RPCError, gift_id: int, chat_id: int,
                             gift_price: int = 0, current_balance: int = 0) -> None:
     error_handlers = ErrorHandler.get_error_handlers()
 
